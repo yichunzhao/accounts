@@ -17,20 +17,31 @@ public class BalanceService {
 
   private BalanceRepository balanceRepository;
 
+  // TODO: invoking restApi to access Transaction context.
   private TransactionRepository transactionRepository;
 
   @Autowired
-  public BalanceService(BalanceRepository balanceRepository) {
+  public BalanceService(
+      BalanceRepository balanceRepository, TransactionRepository transactionRepository) {
     this.balanceRepository = balanceRepository;
+    this.transactionRepository = transactionRepository;
   }
 
-  BalanceEntity getCurrentBalanceByAccountId(Long accountId) {
+  public BalanceEntity getCurrentBalanceByAccountId(Long accountId) {
 
-    // find the latest balance entry for this accountId.
+    // find the latest balance entry for this accountId; if accountId existed, at least getting an
+    // initial balance.
     BalanceEntity historicBalanceEntity =
         balanceRepository.findFirstByAccountIdOrderByLastUpdatedAtDesc(accountId).orElse(null);
 
-    // query the latest transactions since the lastUpdateAt.
+    // this means the accountId is not existed.
+    if (historicBalanceEntity == null) {
+      // by default, an existing account must have an initial balance.
+      // if accountId not existed yet, then return null Balance.
+      return null;
+    }
+
+    // if it is an existing accountId, query the latest transactions since the lastUpdateAt.
     LocalDateTime lastUpdatedAt = historicBalanceEntity.getLastUpdatedAt();
     List<TransactionEntity> transactionEntityList =
         transactionRepository.findByAccountIdAndCreatedAtAfter(accountId, lastUpdatedAt);
@@ -42,6 +53,7 @@ public class BalanceService {
 
     BalanceEntity newBalanceEntity = null;
     // creating balance entry for each transaction.
+
     for (TransactionEntity transactionEntity : transactionEntityList) {
 
       BigDecimal amount = transactionEntity.getAmount();
@@ -49,7 +61,7 @@ public class BalanceService {
       // -1: withdraw ; +1 : deposit, converting BigDecimal.
       BigDecimal transactionType = BigDecimal.valueOf(transactionEntity.getType());
 
-      // the transaction creates a new balance
+      // for a transaction, creating a balance for it.
       currentBalance = currentBalance.add(amount.multiply(transactionType));
 
       // creating a new Balance entry in DB.
@@ -62,8 +74,8 @@ public class BalanceService {
       balanceRepository.save(newBalanceEntity);
     }
 
+    // if newBalanceEntity is still null, then there is no any new transactions yet, then no need to
+    // update the balance.
     return newBalanceEntity != null ? newBalanceEntity : historicBalanceEntity;
   }
-
-
 }

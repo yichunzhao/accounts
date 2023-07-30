@@ -5,7 +5,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 
-public final class TransactionDto {
+public final class TransactionRequestDto {
 
   @Min(value = 1, message = "AccountId must be a value bigger than zero")
   private Long accountId;

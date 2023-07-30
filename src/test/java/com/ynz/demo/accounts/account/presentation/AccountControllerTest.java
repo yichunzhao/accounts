@@ -1,6 +1,6 @@
 package com.ynz.demo.accounts.account.presentation;
 
-import com.ynz.demo.accounts.account.servoce.AccountService;
+import com.ynz.demo.accounts.account.service.AccountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

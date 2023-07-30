@@ -21,7 +21,7 @@ class TransactionControllerTest {
 
   @Test
   public void testProcessATransaction_ValidInput_Returns200() {
-    TransactionDto validTransaction = new TransactionDto();
+    TransactionRequestDto validTransaction = new TransactionRequestDto();
     validTransaction.setAccountId(12345L);
     validTransaction.setType(1);
     validTransaction.setAmount(BigDecimal.valueOf(100));
@@ -38,7 +38,7 @@ class TransactionControllerTest {
 
   @Test
   public void testProcessATransaction_InvalidInput_Returns400WithValidationErrors() {
-    TransactionDto invalidTransaction = new TransactionDto();
+    TransactionRequestDto invalidTransaction = new TransactionRequestDto();
     invalidTransaction.setAccountId(null);
     invalidTransaction.setType(3); // Invalid type
     invalidTransaction.setAmount(BigDecimal.valueOf(-100)); // Invalid amount
